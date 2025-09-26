@@ -1,10 +1,14 @@
 import streamlit as st
 import requests
 import pandas as pd
+import os
 import plotly.express as px
 from geopy.geocoders import Nominatim
+from dotenv import load_dotenv
 
-API_KEY = "Get your own API"  
+load_dotenv()
+
+API_KEY = os.getenv('"N2YO_API_KEY')
 
 st.set_page_config(page_title="Satellite + ISS Tracker", layout="wide")
 st.title("🛰️ Satellite Tracker")
