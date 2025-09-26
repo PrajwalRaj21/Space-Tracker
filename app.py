@@ -4,10 +4,10 @@ import pandas as pd
 import plotly.express as px
 from geopy.geocoders import Nominatim
 
-API_KEY = "GET YOUR OWN KEY!"  
+API_KEY = "Get your own API"  
 
 st.set_page_config(page_title="Satellite + ISS Tracker", layout="wide")
-st.title("🛰️ Satellite + ISS Tracker")
+st.title("🛰️ Satellite Tracker")
 
 city_name = st.text_input("Enter your city name:", "Kathmandu")
 
@@ -18,7 +18,7 @@ category = st.selectbox(
 category_dict = {"All": 0, "Weather": 1, "Communication": 2, "Amateur": 3}
 category_value = category_dict[category]
 
-radius = st.slider("Search Radius (in km):", 100, 1000, 500)
+radius = st.slider("Search Radius (in km):", 1, 90, 30)
 
 if st.button("Track Satellites"):
     try:
@@ -31,8 +31,8 @@ if st.button("Track Satellites"):
             lat, lon = location.latitude, location.longitude
             st.success(f'Coordinates: {lat:.4f}, {lon:.4f}')
 
-           
             url = f"https://api.n2yo.com/rest/v1/satellite/above/{lat}/{lon}/0/{radius}/{category_value}/&apiKey={API_KEY}"
+            
             try:
                 r = requests.get(url, timeout=10)
                 r.raise_for_status()
@@ -45,12 +45,13 @@ if st.button("Track Satellites"):
             if "above" in response and len(response["above"]) > 0:
                 satellites_df = pd.DataFrame(response['above'])
                 satellites_df['Type'] = 'Other Satellites'
-                # Replace negative or missing altitudes
                 satellites_df['satalt'] = satellites_df['satalt'].apply(lambda x: x if x > 0 else 10)
-                st.subheader(f"Satellites above {city_name}")
+
+                st.subheader(f"Satellites above {city_name} (within {radius} km)")
                 st.dataframe(satellites_df[['satname','satid','intDesignator','launchDate','satlat','satlng','satalt']])
             else:
                 st.warning("No satellites found in this area.")
+
 
             #ISS DATA!
             iss_url = f"https://api.n2yo.com/rest/v1/satellite/positions/25544/{lat}/{lon}/0/1/&apiKey={API_KEY}"
